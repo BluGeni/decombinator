@@ -74,6 +74,10 @@ void loop() {
 
     for (uint8_t thirdNumber = 0; thirdNumber < 40; thirdNumber++) {
       Serial.println("first for loop");
+      // [Fordi]: I noticed this pattern in the original array, but
+      // since I don't know the reasoning for the array, I can't really
+      // explain _why_ the pattern is like this.  I assume it has something
+      // to do with how Master locks mechanicals work?
       uint8_t firstNumber = thirdNumber % 4;
       uint8_t secondNumber = firstNumber + 2;
       uint8_t ogSecondNumber = secondNumber;
