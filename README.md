@@ -66,9 +66,19 @@ After wiring it all up and starting the Arduino, use the right button switch to 
 
 ![Circuit](./images/circuit.png)
 
-### Code
+### Building
 
-See [decombo.ino](./decombo.ino)
+Browse to your Arduino sketch directory, and clone this repo into a subdirectory called `decombo`, e.g.,
+
+```bash
+cd ~/Arduino
+git clone https://github.com/BluGeni/decombinator.git decombo
+```
+
+Then, launch Arduino, load up the `decombo` sketch from your sketchbook, and click "Verify".
+
+> Note: [VSCode can be configured to have way more passive dev-friendly features for Arduino](./VSCode.md).
+
 
 ### Things learned/Struggles:
 
