@@ -129,7 +129,7 @@ void decombo(
   display.println("Attempting:"); // text to display
   display.setCursor(3, 15);        // position to display
   display.setTextSize(2);
-  display.println(String(firstNumber) + "-" + String(secondNumber) + "-" + String(thirdNumber));
+  displayCurrentCombo();
   display.display();               // show on OLED
   delay(200);
   // turn right twice to clear lock
@@ -183,7 +183,7 @@ void decombo(
     display.println("Code is:"); // text to display
     display.setCursor(3, 15);        // position to display
     display.setTextSize(2);
-    display.println(String(firstNumber) + "-" + String(secondNumber) + "-" + String(thirdNumber));
+    displayCurrentCombo();
     display.display();               // show on OLED
     exit(0);
   }
@@ -210,6 +210,10 @@ void turnToNumber(int number) {
   //  Serial.println(stepsFromZero);
   stepper1.step(steps);
   delay(200);
+}
+
+void displayCurrentCombo() {
+  display.println(String(currentCombo[0]) + "-" + String(currentCombo[1]) + "-" + String(currentCombo[2]));
 }
 
 void codeFound() {
