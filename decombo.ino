@@ -6,6 +6,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+// Needed for uint8_t
+#include <stdint.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -31,7 +33,8 @@ bool comboFound = false;
 int angle = 0;
 // used to get back to 0 after each combination to avoid error creep
 int stepsFromZero = 0;
-String currentCombo;
+uint8_t currentCombo[3] = {0, 0, 0};
+
 Servo myservo;
 Stepper stepper1 = Stepper(stepsPerRevolution, 8, 10, 9, 11);
 
@@ -68,27 +71,24 @@ void loop() {
   if (digitalRead(startButtonPin) == HIGH && startButtonDebounce == false) {
     startButtonDebounce = true; // toggle button debounce
     Serial.println("Button Pressed");
-    String first_combo_sequence[20] = {"0-2-0", "1-3-1", "2-4-2", "3-5-3", "0-2-4", "1-3-5", "2-4-6", "3-5-7", "0-2-8", "1-3-9", "2-4-10", "3-5-11", "0-2-12", "1-3-13", "2-4-14", "3-5-15", "0-2-16", "1-3-17", "2-4-18", "3-5-19"};
-    //For w. e reason I run out of memory without errors if I have more than 20 combinations so run above line then comment it out and uncomment below line.
-    //    String first_combo_sequence[20] = { "0-2-20", "1-3-21", "2-4-22", "3-5-23", "0-2-24", "1-3-25", "2-4-26", "3-5-27", "0-2-28", "1-3-29", "2-4-30", "3-5-31", "0-2-32", "1-3-33", "2-4-34", "3-5-35", "0-2-36", "1-3-37", "2-4-38", "3-5-39"};
-    for (int n = 0; n < 40; n++) {
+
+    for (uint8_t thirdNumber = 0; thirdNumber < 40; thirdNumber++) {
       Serial.println("first for loop");
-      Serial.println( first_combo_sequence[n]);
-      int firstNumber = getValue(first_combo_sequence[n], '-', 0).toInt();
-      int secondNumber = getValue(first_combo_sequence[n], '-', 1).toInt();
-      int ogSecondNumber = getValue(first_combo_sequence[n], '-', 1).toInt();
-      int thirdNumber = getValue(first_combo_sequence[n], '-', 2).toInt();
-      Serial.println(first_combo_sequence[n]);
-      Serial.println(secondNumber);
+      // [Fordi]: I noticed this pattern in the original array, but
+      // since I don't know the reasoning for the array, I can't really
+      // explain _why_ the pattern is like this.  I assume it has something
+      // to do with how Master locks mechanicals work?
+      uint8_t firstNumber = thirdNumber % 4;
+      uint8_t secondNumber = firstNumber + 2;
+      uint8_t ogSecondNumber = secondNumber;
+      Serial.println(String(firstNumber) + "-" + String(secondNumber) + "-" + String(thirdNumber));
 
       while (firstNumber < 40) {
         while (secondNumber < 40) {
           Serial.println("decombo:");
-          Serial.println(firstNumber);
-          Serial.println(secondNumber);
-          Serial.println(thirdNumber);
+          Serial.println(String(firstNumber) + "-" + String(secondNumber) + "-" + String(thirdNumber));
           Serial.println("-----");
-          decombo(String(firstNumber) + "-" + String(secondNumber) + "-" + String(thirdNumber));
+          decombo(firstNumber, secondNumber, thirdNumber);
           secondNumber = secondNumber + 4;
         }
         firstNumber = firstNumber + 4;
@@ -113,10 +113,15 @@ void loop() {
 
 }
 
-void decombo(String sequence) {
-  Serial.println("sequence:");
-  Serial.println(sequence);
-  currentCombo = sequence;
+
+void decombo(
+  uint8_t firstNumber,
+  uint8_t secondNumber,
+  uint8_t thirdNumber
+) {
+  currentCombo[0] = firstNumber;
+  currentCombo[1] = secondNumber;
+  currentCombo[2] = thirdNumber;
   display.clearDisplay();
   display.setTextSize(1);          // text size
   display.setTextColor(SSD1306_WHITE);     // text color
@@ -124,11 +129,8 @@ void decombo(String sequence) {
   display.println("Attempting:"); // text to display
   display.setCursor(3, 15);        // position to display
   display.setTextSize(2);
-  display.println(sequence);
+  displayCurrentCombo();
   display.display();               // show on OLED
-  int firstNumber = getValue(sequence, '-', 0).toInt();
-  int secondNumber = getValue(sequence, '-', 1).toInt();
-  int thirdNumber = getValue(sequence, '-', 2).toInt();
   delay(200);
   // turn right twice to clear lock
   //    Serial.println("resetting by turning twice to 0");
@@ -181,7 +183,7 @@ void decombo(String sequence) {
     display.println("Code is:"); // text to display
     display.setCursor(3, 15);        // position to display
     display.setTextSize(2);
-    display.println(sequence);
+    displayCurrentCombo();
     display.display();               // show on OLED
     exit(0);
   }
@@ -210,27 +212,13 @@ void turnToNumber(int number) {
   delay(200);
 }
 
-void codeFound() {
-  Serial.println("Combo found!");
-  Serial.println(currentCombo);
-
-  comboFound = true;
+void displayCurrentCombo() {
+  display.println(String(currentCombo[0]) + "-" + String(currentCombo[1]) + "-" + String(currentCombo[2]));
 }
 
+void codeFound() {
+  Serial.println("Combo found!");
+  Serial.println(String(currentCombo[0]) + "-" + String(currentCombo[1]) + "-" + String(currentCombo[2]));
 
-String getValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+  comboFound = true;
 }
