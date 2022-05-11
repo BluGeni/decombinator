@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Arduino",
+            "includePath": [
+                "${config:arduino.path}/hardware/arduino/avr/cores/arduino/**",
+                "${config:arduino.path}/tools/**",
+                "${config:arduino.path}/hardware/tools/**",
+                "${config:arduino.path}/hardware/arduino/avr/**",
+                "${config:arduino.path}/libraries/**",
+                "${HOME}/Arduino/libraries/**",
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "USBCON",
+                "ARDUINO=10800"
+            ],
+            "compilerPath": "${config:arduino.path}/hardware/tools/avr/bin/avr-gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
